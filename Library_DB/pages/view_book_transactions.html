@@ -43,13 +43,13 @@
     <form id="addTransactionForm">
         <fieldset>
             <legend>Add New Transaction</legend>
-            <label for="patronID">Patron ID:</label><br>
-            <input type="number" id="patronID" name="patronID" required><br>
+            <label for="patronID">Patron:</label><br>
+            <select id="patronID" name="patronID" required></select><br>
 
             <label for="numberBooks">Number of Books:</label><br>
             <input type="number" id="numberBooks" name="numberBooks" required><br>
 
-            <label for="staffID">Staff ID:</label><br>
+            <label for="staffID">Staff:</label><br>
             <select id="staffID" name="staffID" required></select><br> <!-- Dropdown populated by fetchStaffIDs() -->
 
             <label for="date">Date:</label><br>
@@ -60,11 +60,40 @@
     </form>
 
     <script>
-        // Fetch transactions and staff IDs on page load
+        // Fetch transactions, patrons, and staff IDs on page load
         document.addEventListener("DOMContentLoaded", function() {
             fetchTransactions();
+            fetchPatronIDs();
             fetchStaffIDs();
         });
+
+        function fetchPatronIDs() {
+            fetch('http://read-renaissance.com/api/patrons')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Raw data received:", data); // Log the raw data
+                    const select = document.getElementById('patronID');
+                    // Clear previous options
+                    select.innerHTML = '';
+                    if (Array.isArray(data)) {
+                        data.forEach(patron => {
+                            let option = document.createElement('option');
+                            option.value = patron.patronID;
+                            option.text = `${patron.first_name} ${patron.last_name}`;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        console.error('Expected an array of patrons, received:', data);
+                    }
+                })
+                .catch(error => console.error('Error fetching patron IDs:', error));
+        }
+
 
         // Fetch and populate staff ID dropdown
         function fetchStaffIDs() {
@@ -74,8 +103,8 @@
                     const select = document.getElementById('staffID');
                     staffMembers.forEach(staff => {
                         let option = document.createElement('option');
-                        option.value = staff.staffID;
-                        option.text = staff.firstName + ' ' + staff.lastName; // Display names for better UX
+                        option.value = staff.staffId;
+                        option.text = `${staff.firstName} ${staff.lastName}`;
                         select.appendChild(option);
                     });
                 })

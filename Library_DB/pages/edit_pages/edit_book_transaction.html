@@ -4,49 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Book Transaction</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <h1>Edit Book Transaction</h1>
     <form id="editTransactionForm">
-        <label for="patronID">Patron ID:</label><br>
-        <input type="number" id="patronID" name="patronID" required><br>
+        <label for="patronID">Patron:</label><br>
+        <select id="patronID" name="patronID" required></select><br>
         <label for="numberBooks">Number of Books:</label><br>
         <input type="number" id="numberBooks" name="numberBooks" required><br>
-        <label for="staffID">Staff ID:</label><br>
-        <input type="number" id="staffID" name="staffID" required><br>
+        <label for="staffID">Staff:</label><br>
+        <select id="staffID" name="staffID" required></select><br>
         <label for="date">Date:</label><br>
         <input type="date" id="date" name="date" required><br>
         <button type="button" onclick="updateTransaction()">Update</button>
+        <button type="button" onclick="goBack()">Go Back</button>
     </form>
 
     <script>
-        // Placeholder for a transactions array on a real application
-        const transactions = [
-            { transactionID: 1001, patronID: 501, numberOfBooks: 3, staffID: 102, date: '2024-04-15' },
-            { transactionID: 1002, patronID: 502, numberOfBooks: 1, staffID: 103, date: '2024-04-16' },
-            { transactionID: 1003, patronID: 503, numberOfBooks: 5, staffID: 104, date: '2024-04-17' }
-        ];
+        // Fetch transaction details on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchPatrons();
+            fetchStaff();
+            fetchTransactionDetails();
+        });
 
+        function fetchPatrons() {
+            fetch('http://read-renaissance.com/api/patrons')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Raw data received:", data); // Log the raw data
+                    const patronSelect = document.getElementById('patronID');
+                    patronSelect.innerHTML = ''; // Clear previous options
+                    if (Array.isArray(data)) {
+                        data.forEach(patron => {
+                            const option = document.createElement('option');
+                            option.value = patron.patronID;
+                            option.text = `${patron.first_name} ${patron.last_name}`;
+                            patronSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error('Expected an array of patrons, received:', data);
+                    }
+                })
+                .catch(error => console.error('Error fetching patrons:', error));
+        }
+
+
+        // Fetch and populate staff dropdown
+        function fetchStaff() {
+            fetch('http://read-renaissance.com/api/staff')
+                .then(response => response.json())
+                .then(staffMembers => {
+                    const staffSelect = document.getElementById('staffID');
+                    staffMembers.forEach(staff => {
+                        const option = document.createElement('option');
+                        option.value = staff.staffId;
+                        option.text = `${staff.firstName} ${staff.lastName}`;
+                        staffSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching staff:', error));
+        }
+
+        // Fetch transaction details from the server
         function fetchTransactionDetails() {
             const transactionID = new URLSearchParams(window.location.search).get('transactionID');
-            const transaction = transactions.find(t => t.transactionID == transactionID);
-            if (transaction) {
-                document.getElementById('patronID').value = transaction.patronID;
-                document.getElementById('numberBooks').value = transaction.numberOfBooks;
-                document.getElementById('staffID').value = transaction.staffID;
-                document.getElementById('date').value = transaction.date;
-            } else {
-                console.log('Transaction not found');
-            }
+            fetch(`http://read-renaissance.com/api/transactions`)
+                .then(response => response.json())
+                .then(transactions => {
+                    const transaction = transactions.find(t => t.transactionID == transactionID);
+                    if (transaction) {
+                        document.getElementById('patronID').value = transaction.patronID;
+                        document.getElementById('numberBooks').value = transaction.numberBooks;
+                        document.getElementById('staffID').value = transaction.staffID;
+                        document.getElementById('date').value = transaction.date.split('T')[0];
+                    } else {
+                        console.log('Transaction not found');
+                    }
+                })
+                .catch(error => console.error('Error fetching transaction:', error));
         }
 
+        // Update transaction details on the server
         function updateTransaction() {
-            console.log("Update transaction details...");
-            // Logic to handle transaction update on a real server
+            const transactionID = new URLSearchParams(window.location.search).get('transactionID');
+            const form = document.getElementById('editTransactionForm');
+            const formData = {
+                patronID: parseInt(form.patronID.value, 10),
+                numberBooks: parseInt(form.numberBooks.value, 10),
+                staffID: parseInt(form.staffID.value, 10),
+                date: form.date.value
+            };
+
+            fetch(`http://read-renaissance.com/api/transactions/${transactionID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Transaction updated:', data);
+                alert('Transaction has been updated successfully!');
+                window.location.href = "http://read-renaissance.com/pages/view_book_transactions.html"; // Redirect to the transactions page
+            })
+            .catch(error => console.error('Error updating transaction:', error));
         }
 
-        window.onload = fetchTransactionDetails;
+        // Go back to the previous page
+        function goBack() {
+            window.history.back();
+        }
     </script>
 </body>
 </html>

@@ -65,16 +65,16 @@
             fetchPatrons();
         });
 
-        // Fetch patrons from the API
         function fetchPatrons() {
             fetch('http://read-renaissance.com/api/patrons')
                 .then(response => response.json())
                 .then(data => {
                     console.log("Raw data received:", data); // Log the raw data
-                    if (Array.isArray(data) && data.length > 0) {
-                        const patrons = data[0]; // Assuming the first element is the array of patrons
-                        console.log("Processed patrons data:", patrons); // Log the processed patrons
-                        populateTable(patrons);
+                    if (Array.isArray(data)) {
+                        console.log("Processed patrons data:", data); // Log the processed patrons
+                        populateTable(data);
+                    } else {
+                        console.error('Expected an array of patrons, received:', data);
                     }
                 })
                 .catch(error => console.error('Error fetching patrons:', error));
@@ -104,6 +104,7 @@
                 `;
             });
         }
+
 
         // Add a new patron via the API
         function addPatron() {

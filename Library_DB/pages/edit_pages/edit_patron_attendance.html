@@ -4,31 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Patron Event Attendance</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <h1>Edit Patron Event Attendance</h1>
     <form id="editAttendanceForm">
-        <label for="patronID">Patron ID:</label><br>
-        <input type="number" id="patronID" name="patronID" required><br>
-        <label for="eventID">Event ID:</label><br>
-        <input type="number" id="eventID" name="eventID" required><br>
+        <label for="patronID">Patron:</label><br>
+        <select id="patronID" name="patronID" required></select><br>
+        <label for="eventID">Event:</label><br>
+        <select id="eventID" name="eventID" required></select><br>
         <button type="button" onclick="updateAttendance()">Update</button>
+        <button type="button" onclick="goBack()">Go Back</button>
     </form>
 
-    <script>
-        function fetchAttendanceDetails() {
-            const eventDetailID = new URLSearchParams(window.location.search).get('eventDetailID');
-            console.log(`Fetch details for Event Detail ID: ${eventDetailID}`);
-            // Ideally, fetch details from server and populate the form here
-        }
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetchPatrons();
+        fetchEvents();
+        fetchAttendanceDetails();
+    });
 
-        function updateAttendance() {
-            console.log("Update attendance details...");
-            // Logic to update attendance details on the server
-        }
+    // Fetch and populate patrons dropdown
+    function fetchPatrons() {
+        fetch('http://read-renaissance.com/api/patrons')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data)) {
+                    console.error('Expected an array of patrons, received:', data);
+                    return;
+                }
+                const patronSelect = document.getElementById('patronID');
+                patronSelect.innerHTML = ''; // Clear existing options
+                data.forEach(patron => {
+                    const option = document.createElement('option');
+                    option.value = patron.patronID;
+                    option.text = `${patron.first_name} ${patron.last_name}`;
+                    patronSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching patrons:', error));
+    }
 
-        window.onload = fetchAttendanceDetails;
-    </script>
+    // Fetch and populate events dropdown
+    function fetchEvents() {
+        fetch('http://read-renaissance.com/api/events')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(events => {
+                if (!Array.isArray(events)) {
+                    console.error('Expected an array of events, received:', events);
+                    return;
+                }
+                const eventSelect = document.getElementById('eventID');
+                eventSelect.innerHTML = ''; // Clear existing options
+                events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.eventID;
+                    option.text = `${event.eventName} (${new Date(event.event_Date).toLocaleString()})`;
+                    eventSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching events:', error));
+    }
+
+    // Fetch attendance details and populate form
+    function fetchAttendanceDetails() {
+        const eventsDetailID = new URLSearchParams(window.location.search).get('eventsDetailID');
+        fetch(`http://read-renaissance.com/api/attendances`)
+            .then(response => response.json())
+            .then(attendances => {
+                if (!Array.isArray(attendances)) {
+                    console.error('Expected an array of attendances, received:', attendances);
+                    return;
+                }
+                const attendance = attendances.find(a => a.eventsDetailID.toString() === eventsDetailID);
+                if (attendance) {
+                    document.getElementById('patronID').value = attendance.patronID;
+                    document.getElementById('eventID').value = attendance.eventID;
+                }
+            })
+            .catch(error => console.error('Error fetching attendance details:', error));
+    }
+
+    // Update attendance details on the server
+    function updateAttendance() {
+        const eventsDetailID = new URLSearchParams(window.location.search).get('eventsDetailID');
+        const form = document.getElementById('editAttendanceForm');
+        const formData = {
+            patronID: parseInt(form.patronID.value, 10),
+            eventID: parseInt(form.eventID.value, 10)
+        };
+
+        fetch(`http://read-renaissance.com/api/attendances/${eventsDetailID}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Attendance updated successfully!');
+            window.location.href = '../view_patron_attendance.html'; // Redirect back
+        })
+        .catch(error => console.error('Error updating attendance:', error));
+    }
+
+    // Function to go back to the previous page
+    function goBack() {
+        window.history.back();
+    }
+</script>
+
 </body>
 </html>

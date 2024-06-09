@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Patron</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <h1>Edit Patron</h1>
@@ -18,18 +18,57 @@
         <label for="membershipDate">Membership Date:</label><br>
         <input type="date" id="membershipDate" name="membershipDate" required><br>
         <button type="button" onclick="updatePatron()">Update</button>
+        <button type="button" onclick="goBack()">Go Back</button>
     </form>
 
     <script>
         function fetchPatronDetails() {
             const patronID = new URLSearchParams(window.location.search).get('patronID');
-            console.log(`Fetch details for patron ID: ${patronID}`);
-            // Fetch and populate form data here
+            fetch(`http://read-renaissance.com/api/patrons`)
+                .then(response => response.json())
+                .then(patrons => {
+                    const patron = patrons.find(p => p.patronID == patronID);
+                    if (patron) {
+                        document.getElementById('firstName').value = patron.first_name;
+                        document.getElementById('lastName').value = patron.last_name;
+                        document.getElementById('email').value = patron.email;
+                        // Correct the membershipDate assignment
+                        document.getElementById('membershipDate').value = patron.membershipDate.split('T')[0];
+                    } else {
+                        console.error('Patron not found');
+                    }
+                })
+                .catch(error => console.error('Error fetching patron details:', error));
         }
 
+
+
         function updatePatron() {
-            console.log("Update patron details...");
-            // Logic to handle patron update
+            const patronID = new URLSearchParams(window.location.search).get('patronID');
+            const form = document.getElementById('editPatronForm');
+            const formData = {
+                firstName: form.firstName.value,
+                lastName: form.lastName.value,
+                email: form.email.value,
+                membershipDate: form.membershipDate.value
+            };
+
+            fetch(`http://read-renaissance.com/api/patrons/${patronID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Patron updated:', data);
+                alert('Patron updated successfully!');
+                window.location.href = '../browse_patrons.html'; // Redirect to the previous page
+            })
+            .catch(error => console.error('Error updating patron:', error));
+        }
+
+        function goBack() {
+            window.location.href = '../browse_patrons.html';
         }
 
         window.onload = fetchPatronDetails;

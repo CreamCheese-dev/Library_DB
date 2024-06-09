@@ -22,28 +22,11 @@
         </nav>
     </header>
 
-    <!-- Search Form -->
-    <div id="search-form">
-        <input type="text" id="searchQuery" placeholder="Search...">
-        <select id="searchCategory">
-            <option value="all">All</option>
-            <option value="books">Books</option>
-            <option value="patrons">Patrons</option>
-            <option value="staff">Staff</option>
-            <option value="transactions">Transactions</option>
-            <option value="events">Events</option>
-        </select>
-        <button onclick="performSearch()">Search</button>
-    </div>
-
-    <script>
-        function performSearch() {
-            var query = document.getElementById('searchQuery').value;
-            var category = document.getElementById('searchCategory').value;
-
-            // Placeholder for where you would add the logic to perform an actual search
-            alert('Search for: ' + query + ' in category: ' + category);
-        }
-    </script>
+    <!-- Introduction Paragraph about ReadRenaissance Repository -->
+    <section id="introduction">
+        <p>
+            "ReadRenaissance Repository" is designed to modernize the operations of community libraries by introducing a database-driven website to handle over 50,000 annual book transactions and manage profiles for more than 2,000 patrons. This platform will also support the management of library events and staff, aiming to replace manual processes with automated systems to improve service quality and operational efficiency. By addressing specific challenges like event tracking and user interaction optimization, our solution aims to transform everyday library operations into a more streamlined, user-friendly experience.
+        </p>
+    </section>
 </body>
 </html>

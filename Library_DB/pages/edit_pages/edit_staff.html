@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Staff Member</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <h1>Edit Staff Member</h1>
@@ -16,18 +16,53 @@
         <label for="position">Position:</label><br>
         <input type="text" id="position" name="position"><br><br>
         <button type="button" onclick="updateStaff()">Update</button>
+        <button type="button" onclick="goBack()">Go Back</button>
     </form>
 
 <script>
     function fetchStaffDetails() {
         const staffId = new URLSearchParams(window.location.search).get('staffId');
-        console.log(`Fetch details for staff ID: ${staffId}`);
-        // Simulate fetching data for the form here
+        fetch('http://read-renaissance.com/api/staff')
+        .then(response => response.json())
+        .then(staffList => {
+            const staff = staffList.find(s => s.staffId.toString() === staffId);
+            if (staff) {
+                document.getElementById('firstName').value = staff.firstName;
+                document.getElementById('lastName').value = staff.lastName;
+                document.getElementById('position').value = staff.position;
+            } else {
+                console.error('Staff member not found');
+                alert('Staff member not found');
+            }
+        })
+        .catch(error => console.error('Error fetching staff details:', error));
     }
 
     function updateStaff() {
-        console.log("Update staff details...");
-        // Logic to handle staff update
+        const staffId = new URLSearchParams(window.location.search).get('staffId');
+        const firstName = document.getElementById('firstName').value;
+        const lastName = document.getElementById('lastName').value;
+        const position = document.getElementById('position').value;
+
+        fetch(`http://read-renaissance.com/api/staff/${staffId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ firstName, lastName, position })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Staff updated successfully!');
+            console.log('Update response:', data);
+            window.location.href = '../view_staff.html'; // Redirect back to the staff listing page
+        })
+        .catch(error => {
+            console.error('Error updating staff:', error);
+            alert('Failed to update staff member.');
+        });
+    }
+
+    function goBack() {
+        window.history.back();
     }
 
     window.onload = fetchStaffDetails;

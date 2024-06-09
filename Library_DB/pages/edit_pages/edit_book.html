@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Book</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
     <h1>Edit Book</h1>
@@ -20,40 +20,52 @@
         <label for="genre">Genre:</label><br>
         <input type="text" id="genre" name="genre"><br><br>
         <button type="button" onclick="updateBook()">Update</button>
-        <button type="button" onclick="deleteBook()">Delete</button>
+        <button type="button" onclick="goBack()">Go Back</button>
     </form>
 
     <script>
-        // Assume data would be fetched based on ISBN passed via query string.
-        // For now, simulate fetching data
-        const books = [
-            { isbn: '978-0393089080', title: 'Liber Novus', author: 'Carl Jung', publishedYear: 2009, genre: 'Psychology' },
-            { isbn: '978-0451524935', title: '1984', author: 'George Orwell', publishedYear: 1949, genre: 'Fiction' },
-            { isbn: '978-0060850524', title: 'Brave New World', author: 'Aldous Huxley', publishedYear: 1932, genre: 'Dystopian' }
-        ];
-
         function fetchBookDetails() {
-            // This would normally be a server call. We simulate it here
             const isbn = new URLSearchParams(window.location.search).get('isbn');
-            const book = books.find(b => b.isbn === isbn);
-            if (book) {
-                document.getElementById('title').value = book.title;
-                document.getElementById('author').value = book.author;
-                document.getElementById('isbn').value = book.isbn;
-                document.getElementById('publishedYear').value = book.publishedYear;
-                document.getElementById('genre').value = book.genre;
-            }
+            fetch(`http://read-renaissance.com/api/books`)
+                .then(response => response.json())
+                .then(books => {
+                    const book = books.find(b => b.isbn === isbn);
+                    if (book) {
+                        document.getElementById('title').value = book.title;
+                        document.getElementById('author').value = book.author;
+                        document.getElementById('isbn').value = book.isbn;
+                        document.getElementById('publishedYear').value = book.publishedYear;
+                        document.getElementById('genre').value = book.genre;
+                    }
+                })
+                .catch(error => console.error('Error fetching book details:', error));
         }
 
         function updateBook() {
-            console.log("Update book details...");
-            // Implement update logic here or redirect to server-side script
+            const isbn = new URLSearchParams(window.location.search).get('isbn');
+            const form = document.getElementById('editBookForm');
+            const formData = {
+                title: form.title.value,
+                author: form.author.value,
+                publishedYear: parseInt(form.publishedYear.value, 10),
+                genre: form.genre.value
+            };
+
+            fetch(`http://read-renaissance.com/api/books/${isbn}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Book updated successfully!');
+                window.location.href = '../browse_books.html';
+            })
+            .catch(error => console.error('Error updating book:', error));
         }
 
-        function deleteBook() {
-            console.log("Delete book...");
-            // Implement deletion logic here or redirect to server-side script
-            // Deleting this book should set the associated foreign key references to NULL or remove the relationships
+        function goBack() {
+            window.history.back();
         }
 
         window.onload = fetchBookDetails;

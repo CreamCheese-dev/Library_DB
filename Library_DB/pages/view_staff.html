@@ -16,7 +16,7 @@
             <a href="view_book_transactions.html">Book Transactions</a>
             <a href="browse_patrons.html">Patrons</a>
             <a href="view_patron_events.html">Patron Events</a>
-            <a href="view_patron_attendance.html">Patrons Attendance</a>
+            <a href="view_patron_attendance.html">Patron Attendance</a>
             <a href="view_staff.html">Staff</a>
         </nav>
     </header>
@@ -37,13 +37,23 @@
         </tbody>
     </table>
 
-    <script>
-        // Fetch and populate the table with staff data on page load
-        window.onload = function() {
-            populateTable();
-        };
+        <!-- Form to add a new staff member -->
+    <h2>Add New Staff Member</h2>
+    <form id="addStaffForm">
+        <label for="firstName">First Name:</label><br>
+        <input type="text" id="firstName" name="firstName" required><br>
+        <label for="lastName">Last Name:</label><br>
+        <input type="text" id="lastName" name="lastName" required><br>
+        <label for="position">Position:</label><br>
+        <input type="text" id="position" name="position" required><br>
+        <button type="button" onclick="addStaff()">Submit</button>
+    </form>
 
-        // Populate the table with staff data
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            populateTable();
+        });
+
         function populateTable() {
             fetch('http://read-renaissance.com/api/staff')
             .then(response => response.json())
@@ -67,19 +77,41 @@
             .catch(error => console.error('Error loading staff data:', error));
         }
 
-        // Function to delete a staff member
+        function addStaff() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const position = document.getElementById('position').value;
+
+            fetch('http://read-renaissance.com/api/staff', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firstName, lastName, position })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || 'Staff member added successfully!');
+                populateTable(); // Refresh the table to show new data
+            })
+            .catch(error => {
+                alert('Failed to add staff member: ' + error.message);
+                console.error('Error adding staff member:', error);
+            });
+        }
+
         function deleteStaff(staffId) {
             fetch(`http://read-renaissance.com/api/staff/${staffId}`, {
                 method: 'DELETE'
             })
             .then(response => response.json())
             .then(result => {
-                console.log(result);
+                alert(result.message || 'Staff member deleted successfully!');
                 populateTable(); // Refresh the table after deletion
             })
-            .catch(error => console.error('Error deleting staff member:', error));
+            .catch(error => {
+                alert('Failed to delete staff member: ' + error.message);
+                console.error('Error deleting staff member:', error);
+            });
         }
     </script>
-
 </body>
 </html>
