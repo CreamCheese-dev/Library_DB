@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Patron Events</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header with navigation for site navigation -->
+    <header>
+        <h1>Patron Events</h1>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="browse_books.html">Books</a>
+            <a href="view_book_transactions.html">Book Transactions</a>
+            <a href="browse_patrons.html">Patrons</a>
+            <a href="view_patron_events.html">Patron Events</a>
+            <a href="view_patron_attendance.html">Patron Attendance</a>
+            <a href="view_staff.html">Staff</a>
+        </nav>
+    </header>
+
+    <!-- Search filter section -->
+    <h2>Search</h2>
+    <div class="filter-container">
+        <input type="text" id="filterInput" onkeyup="filterTable()" placeholder="Search for events...">
+    </div>
+
+    <!-- Table displaying events -->
+    <table id="eventsTable">
+        <thead>
+            <tr>
+                <th>Event ID</th>
+                <th>Event Name</th>
+                <th>Event Date</th>
+                <th>Description</th>
+                <th>Attendance</th>
+                <th>Staff</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Content dynamically filled by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Forms for managing events -->
+    <div class="form-container">
+        <!-- Form for adding new event -->
+        <form id="addEventForm" class="form-style">
+            <fieldset>
+                <legend>Add New Event</legend>
+                <label for="eventName">Event Name (Required):</label>
+                <input type="text" id="eventName" name="eventName" required>
+                <label for="eventDate">Event Date (Required):</label>
+                <input type="datetime-local" id="eventDate" name="eventDate" required>
+                <label for="description">Description (Optional):</label>
+                <textarea id="description" name="description"></textarea>
+                <label for="attendance">Attendance (Optional):</label>
+                <input type="number" id="attendance" name="attendance">
+                <label for="staffId">Staff (Required):</label>
+                <select id="staffId" name="staffId" required></select>
+                <button type="button" onclick="addEvent()">Submit</button>
+            </fieldset>
+        </form>
+
+        <!-- Form for editing existing event -->
+        <form id="editEventForm" class="form-style">
+            <fieldset>
+                <legend>Edit Event</legend>
+                <input type="hidden" id="editEventId">
+                <label for="editEventName">Event Name (Required):</label>
+                <input type="text" id="editEventName" required>
+                <label for="editEventDate">Event Date (Required):</label>
+                <input type="datetime-local" id="editEventDate" required>
+                <label for="editDescription">Description (Optional):</label>
+                <textarea id="editDescription"></textarea>
+                <label for="editAttendance">Attendance (Optional):</label>
+                <input type="number" id="editAttendance">
+                <label for="editStaffId">Staff (Required):</label>
+                <select id="editStaffId" required></select>
+                <button type="button" onclick="updateEvent()">Update</button>
+            </fieldset>
+        </form>
+    </div>
+
+    <!-- JavaScript for CRUD operations and UI interaction -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize data loading
+            fetchEvents();
+            fetchStaff();
+        });
+
+        // Fetch events and populate UI
+        function fetchEvents() {
+            fetch('http://read-renaissance.com/api/events')
+                .then(response => response.json())
+                .then(data => {
+                    populateTable(data);
+                })
+                .catch(error => console.error('Error fetching events:', error));
+        }
+
+        // Fetch staff data to populate select options
+        function fetchStaff() {
+            fetch('http://read-renaissance.com/api/staff')
+                .then(response => response.json())
+                .then(staffMembers => {
+                    populateSelect(staffMembers, 'staffId');
+                    populateSelect(staffMembers, 'editStaffId');
+                })
+                .catch(error => console.error('Error fetching staff:', error));
+        }
+
+        // Populate the events table
+        function populateTable(events) {
+            const tableBody = document.getElementById('eventsTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            events.forEach(event => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${event.eventID}</td>
+                    <td>${event.eventName}</td>
+                    <td>${new Date(event.event_Date).toLocaleString()}</td>
+                    <td>${event.description}</td>
+                    <td>${event.attendance || 'N/A'}</td>
+                    <td>${event.staffID}</td>
+                    <td>
+                        <button onclick="fillEditForm(this)" data-event='${JSON.stringify(event)}'>Edit</button>
+                        <button onclick="deleteEvent(${event.eventID})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Populate select elements with staff or other data
+        function populateSelect(items, selectId) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.staffId;  // Assuming staffId for simplicity, adjust based on actual data keys
+                option.text = `${item.firstName} ${item.lastName}`;
+                select.appendChild(option);
+            });
+        }
+
+        // Validate form fields
+        function validateForm(form) {
+            let valid = true;
+            form.querySelectorAll('input[required], select[required]').forEach(input => {
+                if (!input.value) {
+                    input.classList.add('error');
+                    valid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+            return valid;
+        }
+
+        // Handle form submissions for adding and updating events
+        function addEvent() {
+            const form = document.getElementById('addEventForm');
+            if (!validateForm(form)) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            const description = form.description.value.trim() || 'N/A';
+
+            const eventData = {
+                eventName: form.eventName.value,
+                event_Date: form.eventDate.value,
+                description: description,
+                attendance: parseInt(form.attendance.value) || null,
+                staffID: parseInt(form.staffId.value)
+            };
+
+            fetch('http://read-renaissance.com/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Event added successfully!');
+                fetchEvents();  // Refresh the events list
+                form.reset();  // Clear the form after successful submission
+            })
+            .catch(error => console.error('Error adding event:', error));
+        }
+
+        // Fill the edit form when an event is selected to be edited
+        function fillEditForm(button) {
+            const eventData = JSON.parse(button.getAttribute('data-event'));
+            const form = document.getElementById('editEventForm');
+            form.editEventId.value = eventData.eventID;
+            form.editEventName.value = eventData.eventName;
+            form.editEventDate.value = eventData.event_Date.substring(0, 16); // For datetime-local input
+            form.editDescription.value = eventData.description;
+            form.editAttendance.value = eventData.attendance || '';
+            form.editStaffId.value = eventData.staffID;
+        }
+
+        // Update an existing event
+        function updateEvent() {
+            const form = document.getElementById('editEventForm');
+            if (!validateForm(form)) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            const description = form.editDescription.value.trim() || 'N/A';
+
+            const eventId = form.editEventId.value;
+            const eventData = {
+                eventName: form.editEventName.value,
+                event_Date: form.editEventDate.value,
+                description: description,
+                attendance: parseInt(form.editAttendance.value) || null,
+                staffID: parseInt(form.editStaffId.value)
+            };
+
+            fetch(`http://read-renaissance.com/api/events/${eventId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Event updated successfully!');
+                fetchEvents();  // Refresh the events list
+            })
+            .catch(error => console.error('Error updating event:', error));
+        }
+
+        // Delete an event
+        function deleteEvent(eventId) {
+            fetch(`http://read-renaissance.com/api/events/${eventId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(() => {
+                alert('Event deleted successfully!');
+                fetchEvents();  // Refresh the events list
+            })
+            .catch(error => console.error('Error deleting event:', error));
+        }
+
+        // Filter events based on search input
+        function filterTable() {
+            const input = document.getElementById("filterInput");
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById("eventsTable");
+            const tr = table.getElementsByTagName("tr");
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td");
+                let visible = false;
+                for (let j = 0; j < td.length - 1; j++) {  // Exclude the last column from search
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) {
+                        visible = true;
+                        break;
+                    }
+                }
+                tr[i].style.display = visible ? "" : "none";
+            }
+        }
+    </script>
+</body>
+</html>

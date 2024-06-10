@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Amarante&family=Averia+Serif+Libre:wght@400;700&display=swap');
+
+/* Variables */
+:root {
+    --veryDarkBlue: #152B38;
+    --mediumBlue: #4B89BFEF;
+    --veryLightBlue: #B8CAD9;
+    --darkTurquoise: #426664;
+    --darkSand: #DFCEB9;
+}
+
+/* Page layout blocks */
+header {
+    background-color: var(--darkTurquoise);
+    border-radius: 25px;
+    margin-bottom: 25px;
+    color: var(--darkSand);
+    padding: 1px 6px;
+    font-size: 18px;
+}
+
+nav {
+    font-family: 'Averia Serif Libre', serif;
+    padding: 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+nav a {
+    background-color: var(--veryLightBlue);
+    border-radius: 25px;
+    margin: 2px 20px;
+    color: var(--veryDarkBlue);
+    padding: 15px 5px;
+    text-decoration: none;
+    border: 3px solid var(--darkTurquoise);
+}
+
+nav a:hover {
+    background-color: var(--veryDarkBlue);
+    color: var(--veryLightBlue);
+    border-color: var(--veryLightBlue);
+}
+
+h1, legend {
+    padding-bottom: 20px;
+    font-family: 'Amarante', serif;
+}
+
+body {
+    font-family: 'Averia Serif Libre', serif;
+    margin: 20px;
+    background-color: var(--darkTurquoise);
+    color: #e0e0e0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #333;
+    padding: 8px;
+    background-color: #1e1e1e;
+    color: #fff;
+}
+
+/* Forms and Buttons Styling */
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 20px;
+}
+
+form.half-width {
+    width: 45%;
+    box-shadow: 0 0 10px #ccc;
+    padding: 20px;
+    border-radius: 4px;
+    background-color: var(--veryLightBlue);
+}
+
+fieldset {
+    border: none;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin: 8px 0 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    cursor: pointer;
+    background-color: var(--mediumBlue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: var(--veryDarkBlue);
+}

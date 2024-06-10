@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse and Edit Patrons</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation and Title Header -->
+    <header>
+        <h1>Patrons</h1>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="browse_books.html">Books</a>
+            <a href="view_book_transactions.html">Book Transactions</a>
+            <a href="browse_patrons.html">Patrons</a>
+            <a href="view_patron_events.html">Patron Events</a>
+            <a href="view_patron_attendance.html">Patron Attendance</a>
+            <a href="view_staff.html">Staff</a>
+        </nav>
+    </header>
+
+    <!-- Search Filter Input -->
+    <h2>Search</h2>
+    <div class="filter-container">
+        <input type="text" id="filterInput" onkeyup="filterTable()" placeholder="Search for patrons...">
+    </div>
+
+    <!-- Patrons Data Table -->
+    <table id="patronsTable">
+        <thead>
+            <tr>
+                <th>Patron ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Membership Date</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Forms Container for Adding and Editing Patrons -->
+    <div class="form-container">
+        <!-- Add New Patron Form -->
+        <form id="addPatronForm">
+            <fieldset>
+                <legend>Add New Patron</legend>
+                <label for="firstName">First Name (Required):</label>
+                <input type="text" id="firstName" name="firstName" required><br>
+                <label for="lastName">Last Name (Required):</label>
+                <input type="text" id="lastName" name="lastName" required><br>
+                <label for="email">Email (Required):</label>
+                <input type="email" id="email" name="email" required><br>
+                <label for="membershipDate">Membership Date (Required):</label>
+                <input type="date" id="membershipDate" name="membershipDate" required><br>
+                <label for="address">Address (Optional):</label>
+                <input type="text" id="address" name="address"><br>
+                <label for="phone">Phone (Optional):</label>
+                <input type="text" id="phone" name="phone"><br>
+                <button type="button" onclick="addPatron()">Submit</button>
+            </fieldset>
+        </form>
+
+        <!-- Edit Patron Form -->
+        <form id="editPatronForm">
+            <fieldset>
+                <legend>Edit Patron</legend>
+                <input type="hidden" id="editPatronID">
+                <label for="editFirstName">First Name (Required):</label>
+                <input type="text" id="editFirstName" required><br>
+                <label for="editLastName">Last Name (Required):</label>
+                <input type="text" id="editLastName" required><br>
+                <label for="editEmail">Email (Required):</label>
+                <input type="email" id="editEmail" required><br>
+                <label for="editMembershipDate">Membership Date (Required):</label>
+                <input type="date" id="editMembershipDate" required><br>
+                <label for="editAddress">Address (Optional):</label>
+                <input type="text" id="editAddress"><br>
+                <label for="editPhone">Phone (Optional):</label>
+                <input type="text" id="editPhone"><br>
+                <button type="button" onclick="updatePatron()">Update</button>
+            </fieldset>
+        </form>
+    </div>
+
+    <!-- JavaScript to Manage Patrons -->
+    <script>
+        // Load patron data when the document is fully loaded
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchPatrons();
+        });
+
+        // Fetches patron data from the server and populates the table
+        function fetchPatrons() {
+            fetch('http://read-renaissance.com/api/patrons')
+                .then(response => response.json())
+                .then(data => populateTable(data))
+                .catch(error => console.error('Error fetching patrons:', error));
+        }
+
+        // Populates the patrons table with data retrieved from the server
+        function populateTable(patrons) {
+            const tableBody = document.getElementById('patronsTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Clears existing table data
+            patrons.forEach(patron => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${patron.patronID}</td>
+                    <td>${patron.first_name}</td>
+                    <td>${patron.last_name}</td>
+                    <td>${patron.email}</td>
+                    <td>${patron.membershipDate.split('T')[0]}</td>
+                    <td>${patron.address}</td>
+                    <td>${patron.phone}</td>
+                    <td>
+                        <button onclick="editPatron(${patron.patronID}, '${patron.first_name}', '${patron.last_name}', '${patron.email}', '${patron.membershipDate.split('T')[0]}', '${patron.address}', '${patron.phone}')">Edit</button>
+                        <button onclick="deletePatron(${patron.patronID})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Sets up the edit form with data from the selected patron
+        function editPatron(patronID, firstName, lastName, email, membershipDate, address, phone) {
+            document.getElementById('editPatronID').value = patronID;
+            document.getElementById('editFirstName').value = firstName;
+            document.getElementById('editLastName').value = lastName;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editMembershipDate').value = membershipDate;
+            document.getElementById('editAddress').value = address;
+            document.getElementById('editPhone').value = phone;
+        }
+
+        // Sends updated patron data to the server and refreshes the table
+        function updatePatron() {
+            const patronID = document.getElementById('editPatronID').value.trim();
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const membershipDate = document.getElementById('editMembershipDate').value.trim();
+            const address = document.getElementById('editAddress').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+
+            if (!firstName || !lastName || !email || !membershipDate) {
+                alert('All required fields must be filled.');
+                return;
+            }
+
+            const formData = { firstName, lastName, email, membershipDate, address, phone };
+
+            fetch(`http://read-renaissance.com/api/patrons/${patronID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json().then(data => {
+                        alert('Patron updated successfully!');
+                        fetchPatrons();
+                    });
+                } else {
+                    alert('Failed to update patron. Please check your data and try again.');
+                    throw new Error('Failed to update patron.');
+                }
+            })
+            .catch(error => console.error('Error updating patron:', error));
+        }
+
+        // Adds a new patron to the database and refreshes the table
+        function addPatron() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const membershipDate = document.getElementById('membershipDate').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!firstName || !lastName || !email || !membershipDate) {
+                alert('All required fields must be filled.');
+                return;
+            }
+
+            const formData = { firstName, lastName, email, membershipDate, address, phone };
+
+            fetch('http://read-renaissance.com/api/patrons', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json().then(data => {
+                        alert('Patron added successfully!');
+                        fetchPatrons();
+                    });
+                } else {
+                    alert('Failed to add patron. Please check your data and try again.');
+                    throw new Error('Failed to add patron.');
+                }
+            })
+            .catch(error => console.error('Error adding patron:', error));
+        }
+
+        // Deletes a patron from the database and refreshes the table
+        function deletePatron(patronID) {
+            fetch(`http://read-renaissance.com/api/patrons/${patronID}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Patron deleted successfully!');
+                fetchPatrons();
+            })
+            .catch(error => console.error('Error deleting patron:', error));
+        }
+
+        // Filters the patron table based on input in the search box
+        function filterTable() {
+            let input = document.getElementById("filterInput");
+            let filter = input.value.toUpperCase();
+            let table = document.getElementById("patronsTable");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td");
+                let visible = false;
+                for (let j = 0; j < td.length - 1; j++) {  // Exclude the last column from search
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) {
+                        visible = true;
+                    }
+                }
+                tr[i].style.display = visible ? "" : "none";
+            }
+        }
+    </script>
+</body>
+</html>
