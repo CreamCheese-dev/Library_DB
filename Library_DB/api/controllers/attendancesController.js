@@ -33,11 +33,9 @@ exports.deleteAttendance = async (req, res) => {
     const { eventsDetailID } = req.params;
     try {
         const result = await executeQuery('DELETE FROM Patron_Events_Attendance WHERE eventsDetailID = ?', [eventsDetailID]);
-        if (result.affectedRows) {
-            res.json({ message: "Attendance deleted successfully!" });
-        } else {
-            res.status(404).json({ message: "Attendance not found!" });
-        }
+        result.affectedRows
+            ? res.json({ message: "Attendance deleted successfully!" })
+            : res.status(404).json({ message: "Attendance not found!" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -48,11 +46,9 @@ exports.updateAttendance = async (req, res) => {
     const { patronID, eventID } = req.body;
     try {
         const result = await executeQuery('UPDATE Patron_Events_Attendance SET patronID = ?, eventID = ? WHERE eventsDetailID = ?', [patronID, eventID, eventsDetailID]);
-        if (result.affectedRows) {
-            res.json({ message: "Attendance updated successfully!" });
-        } else {
-            res.status(404).json({ message: "Attendance not found!" });
-        }
+        result.affectedRows
+            ? res.json({ message: "Attendance updated successfully!" })
+            : res.status(404).json({ message: "Attendance not found!" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

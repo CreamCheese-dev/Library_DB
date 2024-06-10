@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Amarante&family=Averia+Serif+Libre:wght@400;700&display=swap');
 
-/*   ----- Variables  -----  */
+/* Variables */
 :root {
     --veryDarkBlue: #152B38;
     --mediumBlue: #4B89BFEF;
@@ -9,31 +9,40 @@
     --darkSand: #DFCEB9;
 }
 
-/*  ----- Page layout blocks -----  */
+/* Page layout blocks */
 header {
-    background-color: var( --darkTurquoise);
+    background-color: var(--darkTurquoise);
     border-radius: 25px;
     margin-bottom: 25px;
     color: var(--darkSand);
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 6px;
+    padding: 1px 6px;
     font-size: 18px;
-
-
-
 }
 
 nav {
     font-family: 'Averia Serif Libre', serif;
+    padding: 8px 0;
+    display: flex;
+    flex-wrap: wrap;
 }
 
-legend{
-
-    font-size: 24px;
+nav a {
+    background-color: var(--veryLightBlue);
+    border-radius: 25px;
+    margin: 2px 20px;
+    color: var(--veryDarkBlue);
+    padding: 15px 5px;
+    text-decoration: none;
+    border: 3px solid var(--darkTurquoise);
 }
 
-h1{
+nav a:hover {
+    background-color: var(--veryDarkBlue);
+    color: var(--veryLightBlue);
+    border-color: var(--veryLightBlue);
+}
+
+h1, legend {
     padding-bottom: 20px;
     font-family: 'Amarante', serif;
 }
@@ -41,7 +50,7 @@ h1{
 body {
     font-family: 'Averia Serif Libre', serif;
     margin: 20px;
-    background-color: var( --darkTurquoise);
+    background-color: var(--darkTurquoise);
     color: #e0e0e0;
 }
 
@@ -49,64 +58,64 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-
 }
 
 th, td {
     border: 1px solid #333;
     padding: 8px;
-    text-align: left;
     background-color: #1e1e1e;
-
+    color: #fff;
 }
 
-th {
-    background-color: #333;
-    color: #fff;
+/* Forms and Buttons Styling */
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 20px;
+}
+
+form.half-width {
+    width: 45%;
+    box-shadow: 0 0 10px #ccc;
+    padding: 20px;
+    border-radius: 4px;
+    background-color: var(--veryLightBlue);
+}
+
+fieldset {
+    border: none;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin: 8px 0 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"],
+select,
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
 button {
-    padding: 5px 10px;
-    margin-right: 5px;
+    padding: 10px 15px;
     cursor: pointer;
-    background-color: #424242;
-    color: #fff;
+    background-color: var(--mediumBlue);
+    color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
+    margin-top: 10px;
 }
 
 button:hover {
-    background-color: #535353;
+    background-color: var(--veryDarkBlue);
 }
-
-nav {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    flex-direction:row;
-    max-width: 100px;
-    display:table-row;
-
-}
-
-    nav a {
-        background-color: var(--veryLightBlue);
-        border-top-left-radius: 25px;
-        border-top-right-radius: 25px;
-        margin-left: 20px;
-        margin-inline: 2px;
-        color: var(--veryDarkBlue);
-        padding: 15px;
-        padding-bottom: 5px;
-        text-decoration: none;
-        border: 3px solid var(--darkTurquoise);
-        display: inline;
-        flex-flow: row wrap;
-
-
-    }
-
-        nav a:hover {
-            background-color: var(--veryDarkBlue);
-            color: var(--veryLightBlue);
-            border: 3px solid var(--veryLightBlue);
-        }

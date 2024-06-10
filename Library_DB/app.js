@@ -1,3 +1,5 @@
+// Modified based on react starter code
+
 // SETUP
 const express = require('express');
 const cors = require('cors');
@@ -10,6 +12,7 @@ const transactionsRoutes = require('./api/routes/transactions');
 const staffRoutes = require('./api/routes/staff');
 const attendancesRoutes = require('./api/routes/attendances');
 const eventRoutes = require('./api/routes/events');
+const bt_detailsRoutes = require('./api/routes/bt_details');
 
 // PORT SETUP
 const app = express();
@@ -26,6 +29,7 @@ app.use('/api/transactions', transactionsRoutes);
 app.use('/api/attendances', attendancesRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/staff', staffRoutes);
+app.use('/api/bt_details', bt_detailsRoutes);
 
 // Listen on HTTP instead of HTTPS
 app.listen(PORT, () => {

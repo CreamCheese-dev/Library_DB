@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Patron Events Attendance</title>
+    <title>Manage Patron Events Attendance</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Header with navigation -->
+    <!-- Navigation and header section -->
     <header>
         <h1>Patron Events Attendance</h1>
         <nav>
@@ -21,7 +21,13 @@
         </nav>
     </header>
 
-    <!-- Table to display events attendance -->
+    <!-- Filter section for searching attendances -->
+    <h2>Search</h2>
+    <div class="filter-container">
+        <input type="text" id="filterInput" onkeyup="filterTable()" placeholder="Search for attendances...">
+    </div>
+
+    <!-- Table displaying event attendances -->
     <table id="attendanceTable">
         <thead>
             <tr>
@@ -32,32 +38,48 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Dynamic rows for event attendance will be inserted here -->
+            <!-- Dynamic content will be filled by JavaScript -->
         </tbody>
     </table>
 
-    <!-- Form to add new attendance record -->
-    <h2>Add New Attendance</h2>
-    <form id="addAttendanceForm">
-        <fieldset>
-            <legend>Add New Attendance</legend>
-            <label for="patronID">Patron:</label><br>
-            <select id="patronID" name="patronID" required></select><br>
-            <label for="eventID">Event:</label><br>
-            <select id="eventID" name="eventID" required></select><br>
-            <button type="button" onclick="addAttendance()">Submit</button>
-        </fieldset>
-    </form>
+    <!-- Form container for adding and editing attendances -->
+    <div class="form-container">
+        <!-- Form for adding new attendance -->
+        <form id="addAttendanceForm" class="form-style">
+            <fieldset>
+                <legend>Add New Attendance</legend>
+                <label for="patronID">Patron:</label>
+                <select id="patronID" name="patronID" required></select>
+                <label for="eventID">Event:</label>
+                <select id="eventID" name="eventID" required></select>
+                <button type="button" onclick="addAttendance()">Submit</button>
+            </fieldset>
+        </form>
 
+        <!-- Form for editing an existing attendance -->
+        <form id="editAttendanceForm" class="form-style">
+            <fieldset>
+                <legend>Edit Attendance</legend>
+                <input type="hidden" id="editEventsDetailID">
+                <label for="editPatronID">Patron:</label>
+                <select id="editPatronID" required></select>
+                <label for="editEventID">Event:</label>
+                <select id="editEventID" required></select>
+                <button type="button" onclick="updateAttendance()">Update</button>
+            </fieldset>
+        </form>
+    </div>
+
+    <!-- Scripts to handle CRUD operations and interactions -->
     <script>
-        // Load event attendance data when the page loads
-        window.onload = function() {
+        document.addEventListener("DOMContentLoaded", function() {
+            // Load necessary data on initial load
             fetchAttendances();
             fetchPatrons();
             fetchEvents();
-        };
+        });
 
-        // Fetch event attendances from the server
+        // Fetch and display attendance records
         function fetchAttendances() {
             fetch('http://read-renaissance.com/api/attendances')
                 .then(response => response.json())
@@ -65,59 +87,41 @@
                 .catch(error => console.error('Error fetching attendances:', error));
         }
 
+        // Fetch all patrons to populate form selects
         function fetchPatrons() {
             fetch('http://read-renaissance.com/api/patrons')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Assuming data is correctly an array; if not, log and handle gracefully
-                    if (!Array.isArray(data)) {
-                        console.error('Expected an array of patrons, received:', data);
-                        return; // Exit the function if data is not an array
-                    }
-                    const patronSelect = document.getElementById('patronID');
-                    patronSelect.innerHTML = ''; // Clear existing options
-                    data.forEach(patron => {
-                        const option = document.createElement('option');
-                        option.value = patron.patronID;
-                        option.text = `${patron.first_name} ${patron.last_name}`;
-                        patronSelect.appendChild(option);
-                    });
+                .then(response => response.json())
+                .then(patrons => {
+                    populateSelect(patrons, 'patronID', 'patron');
+                    populateSelect(patrons, 'editPatronID', 'patron');
                 })
                 .catch(error => console.error('Error fetching patrons:', error));
         }
 
+        // Fetch all events to populate form selects
         function fetchEvents() {
             fetch('http://read-renaissance.com/api/events')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(events => {
-                    if (!Array.isArray(events)) {
-                        console.error('Expected an array of events, received:', events);
-                        return; // Exit the function if data is not an array
-                    }
-                    const eventSelect = document.getElementById('eventID');
-                    eventSelect.innerHTML = ''; // Clear existing options
-                    events.forEach(event => {
-                        const option = document.createElement('option');
-                        option.value = event.eventID;
-                        option.text = `${event.eventName} (${new Date(event.event_Date).toLocaleDateString()})`;
-                        eventSelect.appendChild(option);
-                    });
+                    populateSelect(events, 'eventID', 'event');
+                    populateSelect(events, 'editEventID', 'event');
                 })
                 .catch(error => console.error('Error fetching events:', error));
         }
 
+        // Populate select elements with data
+        function populateSelect(data, selectID, type) {
+            const select = document.getElementById(selectID);
+            select.innerHTML = ''; // Clear existing options
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[type + 'ID']; // Use 'patronID' or 'eventID'
+                option.text = item.first_name ? `${item.first_name} ${item.last_name}` : item.eventName; // Patron name or event name
+                select.appendChild(option);
+            });
+        }
 
-        // Populate the table with attendance data
+        // Populate table with attendance data
         function populateTable(attendances) {
             const tableBody = document.getElementById('attendanceTable').getElementsByTagName('tbody')[0];
             tableBody.innerHTML = '';
@@ -128,46 +132,89 @@
                     <td>${attendance.patronID}</td>
                     <td>${attendance.eventID}</td>
                     <td>
-                        <button onclick="window.location.href='edit_pages/edit_patron_attendance.html?eventsDetailID=${attendance.eventsDetailID}'">Edit</button>
-                        <button onclick="deleteAttendance('${attendance.eventsDetailID}')">Delete</button>
+                        <button onclick="editAttendance(${attendance.eventsDetailID}, ${attendance.patronID}, ${attendance.eventID})">Edit</button>
+                        <button onclick="deleteAttendance(${attendance.eventsDetailID})">Delete</button>
                     </td>
                 `;
             });
         }
 
-        // Function to add a new attendance record
+        // Add a new attendance record
         function addAttendance() {
             const form = document.getElementById('addAttendanceForm');
+            const formData = {
+                patronID: parseInt(form.patronID.value, 10),
+                eventID: parseInt(form.eventID.value, 10)
+            };
             fetch('http://read-renaissance.com/api/attendances', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    patronID: parseInt(form.patronID.value),
-                    eventID: parseInt(form.eventID.value)
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
+                alert('Attendance added successfully!');
                 fetchAttendances();
             })
             .catch(error => console.error('Error adding attendance:', error));
-            form.reset(); // Reset form fields after submission
         }
 
-        // Function to delete an attendance record
+        // Edit an existing attendance record
+        function editAttendance(eventsDetailID, patronID, eventID) {
+            document.getElementById('editEventsDetailID').value = eventsDetailID;
+            document.getElementById('editPatronID').value = patronID;
+            document.getElementById('editEventID').value = eventID;
+        }
+
+        // Update an existing attendance record
+        function updateAttendance() {
+            const eventsDetailID = document.getElementById('editEventsDetailID').value;
+            const formData = {
+                patronID: parseInt(document.getElementById('editPatronID').value, 10),
+                eventID: parseInt(document.getElementById('editEventID').value, 10)
+            };
+            fetch(`http://read-renaissance.com/api/attendances/${eventsDetailID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Attendance updated successfully!');
+                fetchAttendances();
+            })
+            .catch(error => console.error('Error updating attendance:', error));
+        }
+
+        // Delete an attendance record
         function deleteAttendance(eventsDetailID) {
             fetch(`http://read-renaissance.com/api/attendances/${eventsDetailID}`, {
                 method: 'DELETE'
             })
             .then(response => response.json())
-            .then(data => {
-                console.log(data); // Debug response
-                fetchAttendances(); // Refresh the attendance list after deletion
+            .then(() => {
+                alert('Attendance deleted successfully!');
+                fetchAttendances();
             })
             .catch(error => console.error('Error deleting attendance:', error));
+        }
+
+        // Filter the attendance table based on user input
+        function filterTable() {
+            let input = document.getElementById("filterInput");
+            let filter = input.value.toUpperCase();
+            let table = document.getElementById("attendanceTable");
+            let tr = table.getElementsByTagName("tr");
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName("td");
+                let visible = false;
+                for (let j = 0; j < td.length - 1; j++) {  // Exclude the last column from search
+                    if (td[j] && td[j].textContent.toUpperCase().indexOf(filter) > -1) {
+                        visible = true;
+                    }
+                }
+                tr[i].style.display = visible ? "" : "none";
+            }
         }
     </script>
 </body>

@@ -1,4 +1,7 @@
-const express = require('express');
+// Modified based on Express documentation starter code
+// Source: https://expressjs.com/en/4x/api.html#router
+
+onst express = require('express');
 const router = express.Router();
 const attendancesController = require('../controllers/attendancesController');
 
