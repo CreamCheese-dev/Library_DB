@@ -56,4 +56,5 @@ If you are self-hosting, simply open your web-browser and type localhost: (port 
 
 If everything is set-up correctly, you will be greeted with this homepage:
 
-![image](https://github.com/CreamCheese-dev/Library_DB/assets/97072286/9ce5b6f6-f010-48a6-981f-9f72bf8e4f63)
+![image](https://github.com/CreamCheese-dev/Library_DB/assets/97072286/4aa56986-afaa-4ae4-89d1-bd5a33fc20db)
+
