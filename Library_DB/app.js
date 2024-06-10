@@ -1,4 +1,8 @@
-// Modified based on react starter code
+// Using Node API with controllers and routes usage has been inspired by the following sources:
+// https://medium.com/munchy-bytes/building-an-api-with-node-using-controllers-and-routes-ac58978d663f
+// https://lo-victoria.com/build-a-rest-api-with-nodejs-routes-and-controllers
+
+// Inspired, but code has been modified for personal use
 
 // SETUP
 const express = require('express');

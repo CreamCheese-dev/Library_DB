@@ -1,4 +1,3 @@
-// patronsController.js
 const db = require('../helpers/database/db-connector');
 
 // Local helper function to execute database queries with promise support

@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Amarante&family=Averia+Serif+Libre:wght@400;700&display=swap');
 
-/* Variables */
+/* ----- Variables ----- */
 :root {
     --veryDarkBlue: #152B38;
-    --mediumBlue: #4B89BFEF;
+    --mediumBlue: #4B89BF;
     --veryLightBlue: #B8CAD9;
     --darkTurquoise: #426664;
     --darkSand: #DFCEB9;
 }
 
-/* Page layout blocks */
+/* ----- Page layout blocks ----- */
 header {
     background-color: var(--darkTurquoise);
     border-radius: 25px;
@@ -21,28 +21,13 @@ header {
 
 nav {
     font-family: 'Averia Serif Libre', serif;
-    padding: 8px 0;
-    display: flex;
-    flex-wrap: wrap;
 }
 
-nav a {
-    background-color: var(--veryLightBlue);
-    border-radius: 25px;
-    margin: 2px 20px;
-    color: var(--veryDarkBlue);
-    padding: 15px 5px;
-    text-decoration: none;
-    border: 3px solid var(--darkTurquoise);
+legend {
+    font-size: 24px;
 }
 
-nav a:hover {
-    background-color: var(--veryDarkBlue);
-    color: var(--veryLightBlue);
-    border-color: var(--veryLightBlue);
-}
-
-h1, legend {
+h1 {
     padding-bottom: 20px;
     font-family: 'Amarante', serif;
 }
@@ -54,6 +39,12 @@ body {
     color: #e0e0e0;
 }
 
+
+p {
+    font-size: 25px;
+
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -63,24 +54,71 @@ table {
 th, td {
     border: 1px solid #333;
     padding: 8px;
+    text-align: left;
     background-color: #1e1e1e;
+}
+
+th {
+    background-color: #333;
     color: #fff;
 }
 
-/* Forms and Buttons Styling */
+button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    cursor: pointer;
+    background-color: #336579;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #535353;
+}
+
+nav {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    flex-direction: row;
+    max-width: 100px;
+    display: table-row;
+}
+
+nav a {
+    background-color: var(--veryLightBlue);
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    margin-left: 20px;
+    margin-inline: 2px;
+    color: var(--veryDarkBlue);
+    padding: 15px;
+    padding-bottom: 5px;
+    text-decoration: none;
+    border: 3px solid var(--darkTurquoise);
+    display: inline;
+    flex-flow: row wrap;
+}
+
+nav a:hover {
+    background-color: var(--veryDarkBlue);
+    color: var(--veryLightBlue);
+    border: 3px solid var(--veryLightBlue);
+}
+
+/* ----- Form Container Styling ----- */
 .form-container {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
-    padding: 20px;
+    gap: 20px;
 }
 
-form.half-width {
-    width: 45%;
-    box-shadow: 0 0 10px #ccc;
+form {
+    width: 48%;
     padding: 20px;
-    border-radius: 4px;
-    background-color: var(--veryLightBlue);
+    border: 1px solid #ccc;
+    border-radius: 8px;
 }
 
 fieldset {
@@ -91,6 +129,7 @@ fieldset {
 label {
     display: block;
     margin: 8px 0 5px;
+    font-size: 18px;
 }
 
 input[type="text"],
@@ -104,18 +143,4 @@ input[type="number"] {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-}
-
-button {
-    padding: 10px 15px;
-    cursor: pointer;
-    background-color: var(--mediumBlue);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: var(--veryDarkBlue);
 }

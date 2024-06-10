@@ -1,5 +1,12 @@
 const db = require('../helpers/database/db-connector');
 
+// Using Node API with controllers and routes usage has been inspired by the following sources:
+// https://medium.com/munchy-bytes/building-an-api-with-node-using-controllers-and-routes-ac58978d663f
+// https://lo-victoria.com/build-a-rest-api-with-nodejs-routes-and-controllers
+
+// Structure and implementation has been based on the sources but has been motified for personal usage
+// This applies to all controllers in this dir
+
 // Local helper function to execute database queries with promise support
 const executeQuery = async (query, params = []) => {
     try {
